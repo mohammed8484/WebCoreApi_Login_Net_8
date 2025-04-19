@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WebCoreApi_Login_Net8.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✳️ إضافة خدمة CORS
+// ✳️ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -14,8 +17,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-var jwtSettings = builder.Configuration.GetSection("Jwt");
+// ✳️ Controllers & Swagger
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
+// ✳️ EF Core InMemory
+builder.Services.AddDbContext<mydbcontext>(options =>
+    options.UseInMemoryDatabase("TestDb"));
+
+// ✳️ JWT
+var jwtSettings = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -35,18 +47,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
-
-
-builder.Services.AddDbContext<mydbcontext>(options =>
-    options.UseInMemoryDatabase("TestDb"));
 
 var app = builder.Build();
 
-// ✳️ استخدام CORS (قبل UseAuthorization)
 app.UseCors("AllowAll");
 
 if (app.Environment.IsDevelopment())
@@ -55,9 +60,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication(); 
+// ✳️ مهم: ترتيب Authentication ثم Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+
