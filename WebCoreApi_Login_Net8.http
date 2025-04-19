@@ -1,0 +1,6 @@
+@WebCoreApi_Login_Net8_HostAddress = http://localhost:5173
+
+GET {{WebCoreApi_Login_Net8_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
