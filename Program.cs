@@ -11,8 +11,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
+        policy.WithOrigins("http://localhost:4200") // أو رابط التطبيق الفرونت إند
+             .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
